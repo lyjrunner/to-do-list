@@ -20,6 +20,7 @@ background-size: cover;
     display: flex;
     border-bottom:1px solid lightgray;
     position : relative;
+    cursor:pointer
 }
 
 .task-tabs div{
@@ -43,4 +44,8 @@ background-size: cover;
     display:flex;
     justify-content: space-between;
     padding: 1em;
+}
+
+.task-done{
+    text-decoration: line-through;
 }
