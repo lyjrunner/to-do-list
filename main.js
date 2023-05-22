@@ -9,101 +9,127 @@
 //2. trueaus 끝난걸로 간주하고 밑줄 보여주기
 //3. false이면 안끝난걸로 간주하고 그대로 
 // 구동이 안됨 밑줄 및 삭제 버튼이 제멋대로 구동이 안됨 다시해봐 두번째 결과물과 비교 필요
+//유저가 값을 입력한다
+//+버튼을 클릭하면, 할일이 추가된다
+//delete버튼을 누르면 할일이 삭제
+//check버튼을 누르면 밑줄이 간다
+//진행주 끝남 탭을 누르면, 언더바가 이동한다
+//끝남탭은, 끝난 아이템만, 진행중탭은 진행중인 아이템만
+//전체탭을 누르면 다시전체 아이템으로 돌아옴
 
-let taskinput=document.getElementById("task-input");
-let addbutton=document.getElementById("add-button");
-let taskList=[]
-let tabs = document.querySelectorAll(".task-tabs div")
-addbutton.addEventListener("click", addTask);
+let userInput = document.querySelector(".task-input");
+let addButton = document.querySelector(".button-add");
+let tabs = document.querySelectorAll(".tab-type div");
+let underLine = document.getElementById("tab-underline");
+let taskList = [];
+let selectedMenu = "tab-all";
+let filteredList = [];
 
-for(let i=1;i<tabs.length;i++){
-    tabs[i].addEventListener("click",function(event){filter(event)})
+addButton.addEventListener("mousedown", addTask);
+userInput.addEventListener("keydown", function (event) {
+  if (event.keyCode === 13) {
+    addTask(event);
+  }
+});
+for (let i = 0; i < tabs.length; i++) {
+  tabs[i].addEventListener("click", function (event) {
+    filter(event);
+  });
 }
-console.log(tabs)
-function addTask(){
-    let task = {
-        id : randomIDGenerate(),
-        taskContent : taskinput.value,
-        isComplete : false,
 
-    };
-    taskList.push(task);
-    console.log(taskList);
-    render();
+function addTask() {
+  let taskValue = userInput.value;
+  let task = {
+    content: taskValue,
+    isComplete: false,
+    id: randomIDGenerator(),
+  };
+
+  taskList.push(task);
+  userInput.value = "";
+  render();
 }
 
 function render() {
-    let resultHTML = "";
-    for(let i=0;i<taskList.length;i++){
-        if(taskList[i].isComplete == true){
-            resultHTML += `
-        <div class="task-done">
-            <div>${taskList[i].taskContent}</div>
-            <div>
-                <button onclick= "toggleComplete('${taskList[i].id}')">check</button>
-                <button onclick= "deleteTask'${taskList[i].id}')">delete</button>
+  let result = "";
+  list = [];
+  if (selectedMenu === "tab-all") {
+    list = taskList;
+  } else {
+    list = filteredList;
+  }
+
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].isComplete) {
+      result += `<div class="task task-done" id="${list[i].id}">
+            <span>${list[i].content}</span>
+            <div class="button-box">
+            <button onclick="toggleDone('${list[i].id}')"><i class="fas fa-undo-alt"></i></button>
+            <button onclick="deleteTask('${list[i].id}')"><i class="fa fa-trash"></i></button>
             </div>
         </div>`;
-            
-        }else{
-            resultHTML += `
-        <div class="task">
-            <div>${taskList[i].taskContent}</div>
-            <div>
-                <button onclick= "toggleComplete('${taskList[i].id}')">check</button>
-                <button onclick= "deleteTask('${taskList[i].id}')">delete</button>
+    } else {
+      result += `<div class="task" id="${list[i].id}" >
+            <span>${list[i].content}</span>
+            <div class="button-box">
+            <button onclick="toggleDone('${list[i].id}')"><i class="fa fa-check"></i></button>
+            <button onclick="deleteTask('${list[i].id}')"><i class="fa fa-trash"></i></button>
             </div>
         </div>`;
-            }
     }
-    
+  }
 
-    document.getElementById("task-board").innerHTML = resultHTML;
-
+  document.getElementById("task-board").innerHTML = result;
 }
 
-
-function toggleComplete(id) {
-    for(let i=0;i<taskList.length;i++){
-        if(taskList[i].id == id){
-        taskList[i].isComplete=!taskList[i].isComplete;
-        break;
+function toggleDone(id) {
+  for (let i = 0; i < taskList.length; i++) {
+    if (taskList[i].id === id) {
+      taskList[i].isComplete = !taskList[i].isComplete;
+      break;
     }
-    render()
-    console.log(taskList);
+  }
+  filter();
 }
 
-function deleteTask(){
-    for(let i=0;i<taskList.length;i++){
-        if(taskList[i].id==id){
-            taskList.splice(i,1)
-            break;
-        }
-        render()
+function deleteTask(id) {
+  for (let i = 0; i < taskList.length; i++) {
+    if (taskList[i].id === id) {
+      taskList.splice(i, 1);
     }
+  }
 
-    function filter(event){
-        mode=event.target.id
-        let filterList = []
-        if(mode == "all"){
-            render()
-        }
-        else if(mode==ongoing)P{
-            for(let i =;<taskList.length;i++){
-                if(taskList[i].isComplete == false){
-                        filteList.push(taskList[i])
-                }
-            }            
-        }
+  filter();
+}
+function filter(e) {
+  if (e) {
+    selectedMenu = e.target.id;
+    underLine.style.width = e.target.offsetWidth + "px";
+    underLine.style.left = e.target.offsetLeft + "px";
+    underLine.style.top =
+      e.target.offsetTop + (e.target.offsetHeight - 4) + "px";
+  }
+
+  filteredList = [];
+  if (selectedMenu === "tab-not-done") {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].isComplete == false) {
+        filteredList.push(taskList[i]);
+      }
     }
+  } else if (selectedMenu === "tab-done") {
+    for (let i = 0; i < taskList.length; i++) {
+      if (taskList[i].isComplete) {
+        filteredList.push(taskList[i]);
+      }
+    }
+  }
+  render();
 }
 
-
-
+function randomIDGenerator() {
+  // Math.random should be unique because of its seeding algorithm.
+  // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+  // after the decimal.
+  return "_" + Math.random().toString(36).substr(2, 9);
 }
-function filter(event){
-    console.log("filter 클릭")
-}
-
-function randomIDGenerate(){
-    return '_' + Math.random().toString(36).substr(2, 9);}
